@@ -1,4 +1,4 @@
-import {vec3} from 'gl-matrix';
+import {vec2, vec3} from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
 import Square from './geometry/Square';
@@ -65,8 +65,12 @@ function main() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // TODO: get / calculate relevant uniforms to send to shader here
+    var d = new Date();
+    let time = (d.getTime() % 1000000) / 1000.0;
+    let resolution = vec2.fromValues(canvas.width, canvas.height);
     // TODO: send uniforms to shader
-
+    raymarchShader.setTime(time);
+    raymarchShader.setResolution(resolution);
     // March!
     raymarchShader.draw(screenQuad);
 
