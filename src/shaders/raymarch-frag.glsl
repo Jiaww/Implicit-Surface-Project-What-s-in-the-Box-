@@ -240,10 +240,11 @@ void main() {
 
     vec3 ldir = normalize(vec3(1.0, 1.0, -1.0));
 	vec3 hit, normal;
+	float s;
 	// inside view distance
 	if (t <= 50.0){
 		hit = p + q*t;
-
+		s = shadow(hit+normal * 0.11, ldir, 0.01, 50.0);
 		vec2 delta = vec2(0.001, 0.00);
         // compute normal using dxdy
         normal= vec3( f(hit + delta.xyy).x - f(hit - delta.xyy).x, f(hit + delta.yxy).x - f(hit - delta.yxy).x, f(hit + delta.yyx).x - f(hit - delta.yyx).x) / (2.0 * delta.x);
@@ -259,8 +260,6 @@ void main() {
 		color = min(vec3(1.0), light);
 		color *= fao;
 	}
-
-	float s = shadow(hit+normal * 0.11, ldir, 0.01, 50.0);
 	// fog
 	color = mix(color, fog, pow(min(1.0, t / 50.0), 0.5));
 	// contrast
