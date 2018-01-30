@@ -4,6 +4,7 @@ precision highp float;
 
 #define PI 3.1415926
 #define Epsilon 0.0001
+#define GRADIENT_DELTA 0.0002
 
 uniform float u_Time;
 uniform vec2 u_Resolution;
@@ -127,6 +128,112 @@ vec3 greeble0(vec3 p, float phase){
     return smin(vec3(d, 0.0, 0.0), vec3(e, 1.0, 0.0));
 }
 
+vec3 greeble1(vec3 p, float phase){
+	float t = mod(phase + sign(phase - 0.5) * u_Time * 0.5, 1.0);
+
+	float d = sdBox(p, vec3(0.425), 0.05);
+	d = smoothopS(sdBox(p + vec3(0.0, 0.0, 0.3), vec3(0.3, 1.0, 0.01), 0.0), d, 32.0);
+    d = smoothopS(sdBox(p - vec3(0.0, 0.0, 0.3), vec3(0.3, 1.0, 0.01), 0.0), d, 32.0);
+    d = smoothopS(sdBox(p + vec3(0.3, 0.0, 0.0), vec3(0.01, 1.0, 0.3), 0.0), d, 32.0);
+    d = smoothopS(sdBox(p - vec3(0.3, 0.0, 0.0), vec3(0.01, 1.0, 0.3), 0.0), d, 32.0);
+
+    float x = max(-1.0, min(1.0, 4.0*cos(t*2.0*PI)));
+    float z = max(-1.0, min(1.0, 4.0*sin(t*2.0*PI)));
+    x *= 0.3;
+    z *= 0.3;
+    vec3 q = p + vec3(x, 0.0, z);
+    float e = sdBox(q, vec3(0.03, 0.75, 0.03), 0.0);
+    q.y -= 0.75;
+    e = smoothopU(e, sdSphere(q, 0.1), 32.0);
+    return smin(vec3(d, 2.0, 0.0), vec3(e, 3.0, 0.0));
+}
+
+vec3 greeble2(vec3 p, float phase)
+{
+    float d = sdBox(p, vec3(0.425), 0.05);
+    d = smoothopS(sdBox(p + vec3(0.2, 0.0, 0.0), vec3(0.01, 1.0, 0.3), 0.0), d, 32.0);
+    d = smoothopS(sdBox(p - vec3(0.2, 0.0, 0.0), vec3(0.01, 1.0, 0.3), 0.0), d, 32.0);
+    
+    float x = pow(mod(phase + sign(phase-0.5) * u_Time * 0.5, 1.0), 2.0) * 2.0 * PI;
+    float t = max(-0.5, min(0.5, sin(x)));
+    p.yz = r(p.yz, t);
+    vec3 q = p + vec3(0.0, 0.25, 0.0);
+    float e =  sdBox(q - vec3(0.2, 0.0, 0.0), vec3(0.02, 1.0, 0.02), 0.0);
+    e = min(e, sdBox(q + vec3(0.2, 0.0, 0.0), vec3(0.02, 1.0, 0.02), 0.0));
+    e = min(e, sdBox(q - vec3(0.0, 1.0, 0.0), vec3(0.175, 0.02, 0.02), 0.0));
+    e = smoothopU(e, sdSphere(q - vec3(0.2, 1.01, 0.0), 0.03), 32.0);
+    e = smoothopU(e, sdSphere(q - vec3(-0.2, 1.01, 0.0), 0.03), 32.0);
+    q.y -= 1.0;
+    q.xy = r(q.xy, PI / 2.0);
+    e = smoothopU(e, max(sdCylinder(q, vec3(0.0, 0.0, 0.03)), sdBox(q, vec3(0.1), 0.0)), 32.0);
+    return smin(vec3(d, 4.0, 0.0), vec3(e, 5.0, 0.0));
+}
+
+vec3 greeble3(vec3 p, float phase)
+{
+    float d = sdBox(p, vec3(0.4), 0.08);
+    ivec2 i = ivec2(p.xz / 0.15 + floor(phase * 815.0));
+    float phase2 = noise2(vec2(i));
+    vec3 q = p;
+    q.xz = mod(q.xz, 0.15);
+    q.xz -= 0.075;
+    q.y -= 0.5;
+    float hole = smoothopI(sdBox(q, vec3(0.05, 1.0, 0.05), 0.0), sdBox(p, vec3(0.3, 2.0, 0.3), 0.0), 32.0);
+    d = smoothopS(hole, d, 96.0);
+    
+    float t = phase2 * 2.0 * PI + u_Time * 8.0;
+    q.y -= 0.1 * max(-0.5, min(0.5, sin(t)));
+    q.y += 0.5;
+    float e = sdBox(q, vec3(0.025, 0.6, 0.025), 0.0);
+    e = smoothopI(e, sdBox(p, vec3(0.3, 2.0, 0.3), 0.0), 32.0);
+    return smin(vec3(d, 6.0, 0.0), vec3(e, 7.0, 0.0));
+}
+
+vec3 greeble4(vec3 p, float phase)
+{
+    float angle = floor(phase * 4.0) * 0.5 * PI;
+    p.xz = r(p.xz, angle);
+    float d = sdBox(p, vec3(0.4), 0.08);
+    d = smoothopS(sdBox(p - vec3(0.2, 0.0, 0.1), vec3(0.1, 1.0, 0.2), 0.0), d, 32.0);
+    d = smoothopS(sdBox(p + vec3(0.2, 0.0, -0.1), vec3(0.1, 1.0, 0.2), 0.0), d, 32.0);
+    vec3 q = p - vec3(0.0, 0.8, -0.3);
+    float e = sdBox(q + vec3(0.0, 0.2, 0.0), vec3(0.0, 0.15, 0.0), 0.1) / 0.6;
+    q /= 0.6;
+    q.yz = r(q.yz,PI/2.0);
+    
+    float t = phase + 0.2 * u_Time;
+    angle = 0.45 * max(-1.0, min(1.0, 4.0*cos(t*2.0*PI)));
+    float y = 0.5 + 0.5 * max(-1.0, min(1.0, 4.0*sin(t*2.0*PI)));
+    y = pow(y, 1.25 + 0.75 * cos(t*2.0*PI));
+    q.xy = r(q.xy, angle);
+    q.y += 0.4;
+    
+    e = smoothopU(e, cylsphere(q), 16.0);
+    q += vec3(0.0, 0.35, 0.05);
+    e = min(e, sdBox(q, vec3(0.0, 0.0, -0.1), 0.2)) * 0.6;
+    float f = sdBox(q + vec3(0.0, 0.0, 1.2 - y), vec3(0.1), 0.0) * 0.6;
+    return smin(smin(vec3(d, 8.0, 0.0), vec3(e, 9.0, 0.0)), vec3(f, 10.0, 0.0));
+}
+
+vec3 greeble(vec3 p, float findex, float phase)
+{
+    const int indexCount = 6;
+    int index = int(findex * float(indexCount));
+    p.y -= phase * 0.2 - 0.2;
+    if (index == 0)
+        return greeble0(p, phase);
+    else if (index == 1)
+        return greeble1(p, phase);
+    else if (index == 2)
+        return greeble2(p, phase);
+    else if (index == 3)
+        return greeble3(p, phase);
+    else if (index == 4)
+        return greeble4(p, phase);
+        
+    return vec3(sdBox(p, vec3(0.4), 0.025), 10.0, 0.0);
+}
+
 vec3 f( vec3 p )
 {
     ivec3 h = ivec3(p+1337.0);
@@ -136,7 +243,7 @@ vec3 f( vec3 p )
     vec3 q = p;
     q.xz = mod(q.xz, 1.0);
     q -= 0.5;
-	return greeble0(q, phase);
+	return greeble(q, hash, phase);
 }
 
 vec3 colorize(float index)
@@ -194,17 +301,28 @@ float ao(vec3 v, vec3 n)
 	return 1.0 - max(sum * ao_scale, 0.0);
 }
 
-float shadow( in vec3 ro, in vec3 rd, float mint, float maxt )
+
+float softshadow( in vec3 ro, in vec3 rd, float mint, float maxt, float k )
 {
+    float res = 1.0;
     for( float t=mint; t < maxt; )
     {
         float h = f(ro + rd*t).x;
         if( h<0.001 )
             return 0.1;
+        res = min( res, k*h/t );
         t += h;
     }
-    return 1.0;
+    return res;
 }
+
+vec3 gradientNormal(vec3 p) {
+    return normalize(vec3(
+        f(p + vec3(GRADIENT_DELTA, 0, 0)).x - f(p - vec3(GRADIENT_DELTA, 0, 0)).x,
+        f(p + vec3(0, GRADIENT_DELTA, 0)).x - f(p - vec3(0, GRADIENT_DELTA, 0)).x,
+        f(p + vec3(0, 0, GRADIENT_DELTA)).x - f(p - vec3(0, 0, GRADIENT_DELTA)).x));
+}
+
 
 void main() {
 	// TODO: make a Raymarcher!
@@ -239,17 +357,21 @@ void main() {
 	vec3 color = fog;
 
     vec3 ldir = normalize(vec3(1.0, 1.0, -1.0));
-	vec3 hit, normal;
-	float s;
+	vec3 hit = vec3(0.0);
+	vec3 normal = vec3(0.0);
+	float shadow = 1.0;
 	// inside view distance
 	if (t <= 50.0){
 		hit = p + q*t;
-		s = shadow(hit+normal * 0.11, ldir, 0.01, 50.0);
 		vec2 delta = vec2(0.001, 0.00);
         // compute normal using dxdy
-        normal= vec3( f(hit + delta.xyy).x - f(hit - delta.xyy).x, f(hit + delta.yxy).x - f(hit - delta.yxy).x, f(hit + delta.yyx).x - f(hit - delta.yyx).x) / (2.0 * delta.x);
+        normal= vec3( f(hit + delta.xyy).x - f(hit - delta.xyy).x, f(hit + delta.yxy).x - f(hit - delta.yxy).x, f(hit + delta.yyx).x - f(hit - delta.yyx).x);
 
         normal = normalize(normal);
+   		
+   		// Need Office Hour
+   		shadow = softshadow(hit, ldir, 0.01, 25.0, 32.0);
+
         float fao = ao(hit, normal);
         vec3 light = (0.5 * color.rgb + vec3(0.5 * fao * abs(dot(normal, ldir)))) * colorize(d.y);
 		// rim
@@ -261,8 +383,8 @@ void main() {
 		color *= fao;
 	}
 	// fog
-	color = mix(color, fog, pow(min(1.0, t / 50.0), 0.5));
+	color = mix(shadow * color, fog, pow(min(1.0, t / 50.0), 0.5));
 	// contrast
 	color = smoothstep(0.0, 1.0, color); 
-	out_Col = vec4(s*color, 1.0);
+	out_Col = vec4(color, 1.0);
 }
