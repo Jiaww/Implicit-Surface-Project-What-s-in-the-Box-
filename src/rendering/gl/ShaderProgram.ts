@@ -1,6 +1,7 @@
 import {vec2, vec4, mat4} from 'gl-matrix';
 import Drawable from './Drawable';
 import {gl} from '../../globals';
+import {controls} from '../../main';
 
 var activeProgram: WebGLProgram = null;
 
@@ -26,6 +27,7 @@ class ShaderProgram {
   unifView: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
   unifResolution: WebGLUniformLocation;
+  unifSpiderTrig: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -45,6 +47,7 @@ class ShaderProgram {
     this.unifView   = gl.getUniformLocation(this.prog, "u_View");
     this.unifTime   = gl.getUniformLocation(this.prog, "u_Time");
     this.unifResolution = gl.getUniformLocation(this.prog, "u_Resolution");
+    this.unifSpiderTrig = gl.getUniformLocation(this.prog, "u_SpiderTrig");
   }
 
   use() {
@@ -68,6 +71,17 @@ class ShaderProgram {
       gl.uniform2fv(this.unifResolution, resolution);
     }
   }
+
+  setSpiderTrig(spiderTrig: boolean){
+    this.use();
+    if(this.unifSpiderTrig != -1){
+      if (spiderTrig)
+        gl.uniform1f(this.unifSpiderTrig, 1.0);
+      else
+        gl.uniform1f(this.unifSpiderTrig, 0.0);
+    }
+  }
+
   draw(d: Drawable) {
     this.use();
 
