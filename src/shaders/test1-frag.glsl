@@ -10,6 +10,11 @@ precision highp float;
 uniform float u_Time;
 uniform vec2 u_Resolution;
 uniform float u_SpiderTrig;
+uniform float u_ShadowTrig;
+uniform float u_AOTrig;
+uniform float u_AnimationTrig;
+uniform float u_RimTrig;
+uniform float u_FogTrig;
 
 out vec4 out_Col;
 
@@ -139,7 +144,7 @@ float cylsphere(vec3 p){
 vec3 snowman(vec3 p){
     //p.xz = r(p.xz, u_Time);
     p.xz = r(p.xz, PI * 0.15);
-    float t = (sin(u_Time*2.0)+1.0)/2.0;
+    float t = 1.0f - (sin(u_Time*2.0)+1.0)/2.0 * u_AnimationTrig;
     vec3 q;
     q = vec3(p.x, p.y-0.5, p.z-mix(0.01,0.0,t));
     float head = sdEllipsoid(q, vec3(0.5 * mix(0.95, 1.0, t), 0.5 * mix(1.1, 1.0, t), 0.5));
@@ -191,7 +196,7 @@ vec3 spider(vec3 p){
     //p.xz = r(p.xz, u_Time);
     float scale = 0.3;
     //p.xz = r(p.xz, PI/2.0);
-    float t = (sin(u_Time*2.0)+1.0)/2.0;
+    float t = 1.0f - (sin(u_Time*2.0)+1.0)/2.0 * u_AnimationTrig;
     vec3 q = p;
     float head = sdEllipsoid(q, vec3(0.5, 0.3, 0.3) * scale);
     q.z -= 1.0 * scale;
@@ -261,7 +266,7 @@ vec3 spider(vec3 p){
 
 vec3 giftbox(vec3 p){
     float scale = 0.3;
-    float t = (sin(u_Time*2.0)+1.0)/2.0;
+    float t = 1.0f - (sin(u_Time*2.0)+1.0)/2.0 * u_AnimationTrig;
     vec3 q = p;
     float box = sdBox(q, vec3(0.5, 0.36, 0.5), 0.025);
     q.y -= 0.1;
@@ -276,7 +281,7 @@ vec3 giftbox(vec3 p){
 }
 vec3 f( vec3 p ){   
     // p.xz = r(p.xz, u_Time);
-    float t = (sin(u_Time*2.0)+1.0)/2.0;
+    float t = 1.0f - (sin(u_Time*2.0)+1.0)/2.0 * u_AnimationTrig;
     vec3 q = p;
     vec3 snowmanVec = snowman(q);
     q = vec3(q.x + 2.5, q.y+0.65, q.z+1.5);
@@ -396,6 +401,7 @@ void main() {
 	vec3 hit = vec3(0.0);
 	vec3 normal = vec3(0.0);
 	float shadow = 1.0;
+    float fao = 1.0;
 	// inside view distance
 	if (t <= 50.0){
 		hit = p + q*t;
@@ -405,21 +411,26 @@ void main() {
         normal = normalize(normal);
 
    		// Shadow
-   		shadow = softshadow(hit + normal * 0.01, ldir, 0.01, 25.0, 32.0);
+        if (u_ShadowTrig == 1.0)
+   		   shadow = softshadow(hit + normal * 0.01, ldir, 0.01, 25.0, 32.0);
         // Ambient Occlusion
-        float fao = ao(hit, normal);
+        if (u_AOTrig == 1.0)
+            fao = ao(hit, normal);
 
         vec3 light = (0.5 * color.rgb + vec3(0.5 * fao * abs(dot(normal, ldir)))) * colorize(d.y);
 		// rim
-		light += (1.0 - t / 50.0) * vec3(fao * pow(1.0 - abs(dot(normal, q)), 4.0)); 
+        if (u_RimTrig == 1.0)
+		  light += (1.0 - t / 50.0) * vec3(fao * pow(1.0 - abs(dot(normal, q)), 4.0)); 
 		vec3 reflectDir = reflect(q, normal);
-		light += fao * vec3(pow(abs(dot(q, ldir)), 16.0));
+		light += fao * vec3(pow(abs(dot(q, ldir)), 64.0));
 		color = min(vec3(1.0), light);
 		color *= fao;
 	}
+    color = shadow * color;
 	// fog
-	color = mix(shadow * color, fog, pow(min(1.0, t / 50.0), 0.7));
+    if (u_FogTrig == 1.0)
+	   color = mix(color, fog, pow(min(1.0, t / 50.0), 0.7));
 	// contrast
-	color = smoothstep(0.0, 1.0, color); 
+    color = smoothstep(0.0, 1.0, color); 
 	out_Col = vec4(color, 1.0);
 }

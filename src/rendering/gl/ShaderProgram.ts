@@ -28,6 +28,11 @@ class ShaderProgram {
   unifTime: WebGLUniformLocation;
   unifResolution: WebGLUniformLocation;
   unifSpiderTrig: WebGLUniformLocation;
+  unifShadowTrig: WebGLUniformLocation;
+  unifAOTrig: WebGLUniformLocation;
+  unifAnimationTrig: WebGLUniformLocation;
+  unifRimTrig: WebGLUniformLocation;
+  unifFogTrig: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -48,6 +53,11 @@ class ShaderProgram {
     this.unifTime   = gl.getUniformLocation(this.prog, "u_Time");
     this.unifResolution = gl.getUniformLocation(this.prog, "u_Resolution");
     this.unifSpiderTrig = gl.getUniformLocation(this.prog, "u_SpiderTrig");
+    this.unifShadowTrig = gl.getUniformLocation(this.prog, "u_ShadowTrig");
+    this.unifAOTrig = gl.getUniformLocation(this.prog, "u_AOTrig");
+    this.unifAnimationTrig = gl.getUniformLocation(this.prog, "u_AnimationTrig");
+    this.unifRimTrig = gl.getUniformLocation(this.prog, "u_RimTrig");
+    this.unifFogTrig = gl.getUniformLocation(this.prog, "u_FogTrig");
   }
 
   use() {
@@ -72,13 +82,43 @@ class ShaderProgram {
     }
   }
 
-  setSpiderTrig(spiderTrig: boolean){
+  setTrigs(spiderTrig: boolean, shadowTrig: boolean, AOTrig: boolean, animationTrig: boolean, rimTrig: boolean, fogTrig: boolean){
     this.use();
     if(this.unifSpiderTrig != -1){
       if (spiderTrig)
         gl.uniform1f(this.unifSpiderTrig, 1.0);
       else
         gl.uniform1f(this.unifSpiderTrig, 0.0);
+    }
+    if(this.unifShadowTrig != -1){
+      if (shadowTrig)
+        gl.uniform1f(this.unifShadowTrig, 1.0);
+      else
+        gl.uniform1f(this.unifShadowTrig, 0.0);
+    }
+    if(this.unifAOTrig != -1){
+      if (AOTrig)
+        gl.uniform1f(this.unifAOTrig, 1.0);
+      else
+        gl.uniform1f(this.unifAOTrig, 0.0);
+    }
+    if(this.unifAnimationTrig != -1){
+      if (animationTrig)
+        gl.uniform1f(this.unifAnimationTrig, 1.0);
+      else
+        gl.uniform1f(this.unifAnimationTrig, 0.0);
+    }
+    if(this.unifRimTrig != -1){
+      if (rimTrig)
+        gl.uniform1f(this.unifRimTrig, 1.0);
+      else
+        gl.uniform1f(this.unifRimTrig, 0.0);
+    }
+    if(this.unifFogTrig != -1){
+      if (fogTrig)
+        gl.uniform1f(this.unifFogTrig, 1.0);
+      else
+        gl.uniform1f(this.unifFogTrig, 0.0);
     }
   }
 

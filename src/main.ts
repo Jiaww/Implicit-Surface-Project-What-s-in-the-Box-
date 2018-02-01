@@ -10,7 +10,12 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 export const controls = {
   // TODO: add any controls you want
-  SpiderTrig: false,
+  Spider: false,
+  Shadow: true,
+  AmbientOcclusion: true,
+  Animation: true,
+  Rim: true,
+  Fog: true,
 };
 
 let screenQuad: Square;
@@ -28,7 +33,12 @@ function main() {
   const gui = new DAT.GUI();
   // E.G. gui.add(controls, 'tesselations', 0, 8).step(1);
   //gui.add(controls, "What's in the box !?");
-  gui.add(controls, 'SpiderTrig');
+  gui.add(controls, 'Spider');
+  gui.add(controls, 'Shadow');
+  gui.add(controls, 'AmbientOcclusion');
+  gui.add(controls, 'Animation');
+  gui.add(controls, 'Rim');
+  gui.add(controls, 'Fog');
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -74,7 +84,7 @@ function main() {
     // TODO: send uniforms to shader
     raymarchShader.setTime(time);
     raymarchShader.setResolution(resolution);
-    raymarchShader.setSpiderTrig(controls.SpiderTrig);
+    raymarchShader.setTrigs(controls.Spider, controls.Shadow, controls.AmbientOcclusion, controls.Animation, controls.Rim, controls.Fog);
     // March!
     raymarchShader.draw(screenQuad);
 
