@@ -66,7 +66,7 @@ function main() {
 
   const raymarchShader = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/screenspace-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/test1-frag.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/raymarch-frag.glsl')),
   ]);
 
   // This function will be called every frame
