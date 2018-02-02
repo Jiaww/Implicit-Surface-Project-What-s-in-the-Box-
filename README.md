@@ -9,7 +9,7 @@
 
 ## Overview
 - The project is based on **Ray-marching** and **SDF**, all of the shading process happens in fragment shader. The content of the project is a snowman, scared by something in the box, you can set the checkbox to put there a spider or just make it more mysterious, nothing. For the shading part, there are soft shadow, ambient occlusion, fog, rim highlight and basic blinn-phong, most of them I learned from [Iq's website](http://www.iquilezles.org/www/index.htm) and the [example](https://www.shadertoy.com/view/XlfGzH) on shadertoy.
-- [Live Demo]()
+- [Live Demo](https://jiaww.github.io/homework-2-implicit-surfaces-Jiaww/)
 
 |**Final View(Without Spider)**|
 |---|
