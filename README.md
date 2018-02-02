@@ -34,7 +34,7 @@
         return res;
     }
     ```
-    * **Ambient Occlusion**: From the hit point along his normal direction, keep checking its SDF(map) value, if it keep increasing rapidly, it means there is no occlusion near it. (It is not the precise value of the occlusion, but it can estimate the value approximatly)
+   * **Ambient Occlusion**: From the hit point along his normal direction, keep checking its SDF(map) value, if it keep increasing rapidly, it means there is no occlusion near it. (It is not the precise value of the occlusion, but it can estimate the value approximatly)
     ```glsl
     float ao(vec3 v, vec3 n) {
         const int ao_iterations = 10;
@@ -54,8 +54,10 @@
 
         return 1.0 - max(sum * ao_scale, 0.0);
     }
-    ```
-     * **Rim Highlight**: Highlight the pixel if it is more perpendicular to the view ray direction.
+    ``` 
+    
+    
+    * **Rim Highlight**: Highlight the pixel if it is more perpendicular to the view ray direction.
      ```glsl
         light += (1.0 - t / 50.0) * vec3(fao * pow(1.0 - abs(dot(normal, q)), 4.0));
     ```
