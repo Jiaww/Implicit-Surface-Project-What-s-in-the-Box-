@@ -279,7 +279,8 @@ vec3 giftbox(vec3 p){
     vec3 final = vec3(min(box, lib), 6.0, 0.0);
     return final;
 }
-vec3 f( vec3 p ){   
+
+vec3 map( vec3 p ){   
     // p.xz = r(p.xz, u_Time);
     float t = 1.0f - (sin(u_Time*2.0)+1.0)/2.0 * u_AnimationTrig;
     vec3 q = p;
@@ -302,8 +303,7 @@ vec3 f( vec3 p ){
         return smin(boxVec, smin(snowmanVec, planeVec));
 }
 
-vec3 colorize(float index)
-{
+vec3 colorize(float index){
     // Black
     if (index == 0.0)
         return vec3(0.1, 0.1, 0.1);
@@ -332,10 +332,9 @@ vec3 colorize(float index)
 	return vec3(index / 10.0);
 }
 
-float ao(vec3 v, vec3 n) 
-{
+float ao(vec3 v, vec3 n) {
     const int ao_iterations = 10;
-    const float ao_step = 0.2;
+    const float ao_step = 0.15;
     const float ao_scale = 0.75;
     
 	float sum = 0.0;
@@ -344,7 +343,7 @@ float ao(vec3 v, vec3 n)
     
 	for (int i = 0; i < ao_iterations; i++)
     {
-		sum += (len - f(v + n * len).x) * att;		
+		sum += (len - map(v + n * len).x) * att;		
 		len += ao_step;		
 		att *= 0.5;
 	}
@@ -353,12 +352,11 @@ float ao(vec3 v, vec3 n)
 }
 
 
-float softshadow( in vec3 ro, in vec3 rd, float mint, float maxt, float k )
-{
+float softshadow( in vec3 ro, in vec3 rd, float mint, float maxt, float k ){
     float res = 1.0;
     for( float t=mint; t < maxt; )
     {
-        float h = f(ro + rd*t).x;
+        float h = map(ro + rd*t).x;
         if( h<0.001 )
             return 0.25;
         res = min( res, k*h/t );
@@ -388,7 +386,7 @@ void main() {
 	const float maxSteps = 96.0;
 	// Ray Marching
 	for (float tt = 0.0; tt < maxSteps; ++tt){
-		d = f(p + q*t);
+		d = map(p + q*t);
 		t += d.x*0.45;
 		if(!(t<=50.0) || d.x <= Epsilon)
 			break;
@@ -407,7 +405,7 @@ void main() {
 		hit = p + q*t;
 		vec2 delta = vec2(0.001, 0.00);
         // compute normal using dxdy
-        normal= vec3( f(hit + delta.xyy).x - f(hit - delta.xyy).x, f(hit + delta.yxy).x - f(hit - delta.yxy).x, f(hit + delta.yyx).x - f(hit - delta.yyx).x);
+        normal= vec3( map(hit + delta.xyy).x - map(hit - delta.xyy).x, map(hit + delta.yxy).x - map(hit - delta.yxy).x, map(hit + delta.yyx).x - map(hit - delta.yyx).x);
         normal = normalize(normal);
 
    		// Shadow
